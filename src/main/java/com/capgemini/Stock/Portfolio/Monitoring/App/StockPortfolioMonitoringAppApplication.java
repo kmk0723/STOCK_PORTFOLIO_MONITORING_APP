@@ -9,5 +9,4 @@ public class StockPortfolioMonitoringAppApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(StockPortfolioMonitoringAppApplication.class, args);
 	}
-
 }
