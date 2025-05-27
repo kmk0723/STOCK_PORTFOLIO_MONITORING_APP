@@ -2,7 +2,6 @@ package com.capgemini.Stock.Portfolio.Monitoring.App.model;
 
 import java.time.LocalDateTime;
 
-import org.apache.catalina.User;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,7 +31,7 @@ public class Alert {
 	
 	private User user;
 	
-	private LocalDateTime createdTime = LocalDateTime.now();
+	private LocalDateTime createdAt = LocalDateTime.now();
 	
 	public Long getId() {
         return id;
@@ -76,11 +75,11 @@ public class Alert {
         this.user = user;
     }
 
-    public LocalDateTime getCreatedTime() {
-        return createdTime;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
-    public void setCreatedTime(LocalDateTime createdTime) {
-        this.createdTime = createdTime;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     
