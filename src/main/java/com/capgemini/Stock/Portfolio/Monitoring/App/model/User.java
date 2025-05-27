@@ -16,7 +16,7 @@ public class User {
 	private String passowrd;
 	@Column(nullable = false)
 	private String role = "USER";
-	private LocalDateTime createdTime = LocalDateTime.now();
+	private LocalDateTime createAt = LocalDateTime.now();
 	
 	//Getters and setters to access private variables (Encapsulation)
 	public Long getId() {
@@ -49,10 +49,10 @@ public class User {
 	public void setRole(String role) {
 		this.role = role;
 	}
-	public LocalDateTime getCreatedTime() {
-		return createdTime;
+	public LocalDateTime getCreateAt() {
+		return createAt;
 	}
 	public void setCreateAt(LocalDateTime createAt) {
-		this.createdTime = createAt;
+		this.createAt = createAt;
 	}
 }
