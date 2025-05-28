@@ -1,58 +1,61 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.model;
+
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 public class User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)   //Specifies how Primary Key is automatically generated
-	private Long id; //Primary Key
-	@Column(nullable = false)
-	private String username;
-	@Column(nullable = false)
-	private String email;        
-	@Column(nullable = false)
-	private String passowrd;
-	@Column(nullable = false)
-	private String role = "USER";
-	private LocalDateTime createAt = LocalDateTime.now();
-	
-	//Getters and setters to access private variables (Encapsulation)
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getUsername() {
-		return username;
-	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	public String getEmial() {
-		return email;
-	}
-	public void setEmial(String email) {
-		this.email = email;
-	}
-	public String getPassowrd() {
-		return passowrd;
-	}
-	public void setPassowrd(String passowrd) {
-		this.passowrd = passowrd;
-	}
-	public String getRole() {
-		return role;
-	}
-	public void setRole(String role) {
-		this.role = role;
-	}
-	public LocalDateTime getCreateAt() {
-		return createAt;
-	}
-	public void setCreateAt(LocalDateTime createAt) {
-		this.createAt = createAt;
-	}
+
+    public enum Role {
+        ADMIN,
+        USER
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
+
+    // --- Getters and Setters ---
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }
