@@ -21,11 +21,11 @@ public class Alert {
 
     private Long userId;
 
-    private String type; // "PRICE" or "PORTFOLIO"
+    private String type; 
     private Double buyPrice;
     private String stockSymbol;
     private Double threshold;
-    private String direction; // "ABOVE", "BELOW", "EXCEEDS_LOSS"
+    private String direction; // "ABOVE", "BELOW"
 
     private Boolean isActive;
 

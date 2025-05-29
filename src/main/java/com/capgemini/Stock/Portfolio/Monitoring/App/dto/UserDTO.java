@@ -2,12 +2,21 @@ package com.capgemini.Stock.Portfolio.Monitoring.App.dto;
 
 
 public class UserDTO {
+	
+	private Long id;
     private String username;
     private String email;
     private String password;
     private String role;
     private Long portfolioId;
-
+    public Long getId() { 
+    	return id; 
+    }
+    
+    public void setId(Long id) { 
+    	this.id = id;
+    }
+    
     // Getters and Setters
     public String getUsername() { 
     	return username; 

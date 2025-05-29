@@ -90,7 +90,7 @@ public class PriceFetcherServiceImpl {
 			
 			// Triggers every 60 seconds and calls Evaluate Alerts
 
-	    @Scheduled(fixedRate = 6000000) 
+	    @Scheduled(fixedRate = 6000) 
 	    public void fetchPrices() {
 	        
 	        List<Alert> alerts = alertRepository.findAll();

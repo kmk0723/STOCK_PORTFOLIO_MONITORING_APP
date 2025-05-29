@@ -21,39 +21,47 @@ public class Holding {
 	@JoinColumn(name="porfolio_id")
 	private Portfolio portfolio;
 	
-	private String stockSymbol;
+    private String symbol;
 	private int quantity;
 	public double buyPrice;
 	
-	public Long getId() {
-		return id;
-	}
-	
-	public Portfolio getPortfolio() {
-		return portfolio;
-	}
-	
-	public int getQuantity() {
-		return quantity;
-	}
-	
-	public double getBuyPrice() {
-		return buyPrice;
-	}
-	
-	public void setId(long id) {
-		this.id = id;
-	}
-	
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
-	
-	public void setPortfolio(Portfolio portfolio) {
-		this.portfolio = portfolio;
-	}
-	
-	public void setBuyPrice(double price) {
-		this.buyPrice = price;
-	}
+	 public Long getId() {
+	        return id;
+	    }
+
+	    public void setId(Long id) {
+	        this.id = id;
+	    }
+
+	    public String getSymbol() {
+	        return symbol;
+	    }
+
+	    public void setSymbol(String symbol) {
+	        this.symbol = symbol;
+	    }
+
+	    public int getQuantity() {
+	        return quantity;
+	    }
+
+	    public void setQuantity(int quantity) {
+	        this.quantity = quantity;
+	    }
+
+	    public double getBuyPrice() {
+	        return buyPrice;
+	    }
+
+	    public void setBuyPrice(double buyPrice) {
+	        this.buyPrice = buyPrice;
+	    }
+
+	    public Portfolio getPortfolio() {
+	        return portfolio;
+	    }
+
+	    public void setPortfolio(Portfolio portfolio) {
+	        this.portfolio = portfolio;
+	    }
 }

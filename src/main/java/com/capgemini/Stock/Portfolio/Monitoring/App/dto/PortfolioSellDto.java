@@ -1,10 +1,9 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.dto;
 
-public class PortfolioDto {
+public class PortfolioSellDto {
 	private String username ;
 	private String symbol;
 	private int quantity;
-	private double buyPrice;
 	
 	public String getUsername() {
 		return username;
@@ -16,9 +15,7 @@ public class PortfolioDto {
 		return quantity;
 	}
 	
-	public double getBuyPrice() {
-		return buyPrice;
-	}
+	
 	
 	public void setUsername(String username) {
 		this.username = username;
@@ -31,8 +28,8 @@ public class PortfolioDto {
 		this.quantity = quantity;
 	}
 	
-	public void setBuyPrice(double buyPrice) {
-		this.buyPrice = buyPrice;
-	}
 
+
+
+	
 }
