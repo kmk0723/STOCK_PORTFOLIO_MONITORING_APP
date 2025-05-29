@@ -12,75 +12,86 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-
 @Entity
 @Table(name = "alerts")
-
 public class Alert {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	
-	private Long id;
-	private String stockSymbol;
-	private double targetPrice;
-	private String alertType;
-	private boolean active = true;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	
-	private User user;
-	
-	private LocalDateTime createdAt = LocalDateTime.now();
-	
-	public Long getId() {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long userId;
+
+    private String type; // "PRICE" or "PORTFOLIO"
+    private Double buyPrice;
+    private String stockSymbol;
+    private Double threshold;
+    private String direction; // "ABOVE", "BELOW", "EXCEEDS_LOSS"
+
+    private Boolean isActive;
+
+    // Getters and setters
+    public Long getId() {
         return id;
     }
+
     public void setId(Long id) {
         this.id = id;
+    }
+    
+    public Double getBuyPrice() {
+        return buyPrice;
+    }
+
+    public void setBuyPrice(Double buyPrice) {
+        this.buyPrice = buyPrice;
+    }
+
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getStockSymbol() {
         return stockSymbol;
     }
+
     public void setStockSymbol(String stockSymbol) {
         this.stockSymbol = stockSymbol;
     }
 
-    public double getTargetPrice() {
-        return targetPrice;
-    }
-    public void setTargetPrice(double targetPrice) {
-        this.targetPrice = targetPrice;
+    public Double getThreshold() {
+        return threshold;
     }
 
-    public String getAlertType() {
-        return alertType;
-    }
-    public void setAlertType(String alertType) {
-        this.alertType = alertType;
+    public void setThreshold(Double threshold) {
+        this.threshold = threshold;
     }
 
-    public boolean isActive() {
-        return active;
-    }
-    public void setActive(boolean active) {
-        this.active = active;
+    public String getDirection() {
+        return direction;
     }
 
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
+    public void setDirection(String direction) {
+        this.direction = direction;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public Boolean getIsActive() {
+        return isActive;
     }
 
-    
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
+    }
 }
