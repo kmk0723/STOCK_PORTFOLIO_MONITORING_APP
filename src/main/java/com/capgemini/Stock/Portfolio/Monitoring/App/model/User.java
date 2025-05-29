@@ -1,32 +1,21 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.model;
-
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
 public class User {
-
-    public enum Role {
-        ADMIN,
-        USER
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
     private String username;
-
-    @Column(nullable = false)
+    private String email;
     private String password;
+    private String role;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Portfolio portfolio;
 
-    // --- Getters and Setters ---
-
+    // Getters and Setters (Encapsulation)
     public Long getId() {
         return id;
     }
@@ -43,6 +32,14 @@ public class User {
         this.username = username;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -51,11 +48,19 @@ public class User {
         this.password = password;
     }
 
-    public Role getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(String role) {
         this.role = role;
+    }
+
+    public Portfolio getPortfolio() {
+        return portfolio;
+    }
+
+    public void setPortfolio(Portfolio portfolio) {
+        this.portfolio = portfolio;
     }
 }
