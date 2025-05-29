@@ -1,10 +1,10 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
 import com.capgemini.Stock.Portfolio.Monitoring.App.service.UserService;
-
 import java.util.Map;
+import com.capgemini.Stock.Portfolio.Monitoring.App.dto.UserDTO;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -12,17 +12,16 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-    	user.setRole("USER");
-        return userService.register(user);
-    }
-    
-    @PostMapping("/register-admin")
-    public User registerAdmin(@RequestBody User user) {
-        user.setRole("ADMIN");
-        return userService.register(user);
+    public UserDTO register(@RequestBody UserDTO userDto) {
+        userDto.setRole("USER");
+        return userService.register(userDto);
     }
 
+    @PostMapping("/register-admin")
+    public UserDTO registerAdmin(@RequestBody UserDTO userDto) {
+        userDto.setRole("ADMIN");
+        return userService.register(userDto);
+    }
 
     @PostMapping("/login")
     public Object login(@RequestBody Map<String, String> credentials) {
@@ -31,7 +30,7 @@ public class UserController {
                         "username", user.getUsername(),
                         "email", user.getEmail(),
                         "role", user.getRole(),
-                        "portfolioId", user.getPortfolio().getId()
+                        "portfolioId", user.getPortfolioId()
                 ))
                 .orElse(Map.of("error", "Invalid credentials"));
     }
