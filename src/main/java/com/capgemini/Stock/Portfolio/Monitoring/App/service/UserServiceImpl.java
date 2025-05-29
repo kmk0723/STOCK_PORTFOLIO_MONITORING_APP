@@ -33,12 +33,13 @@ public class UserServiceImpl implements UserService {
 
         // Mapping to DTO
         UserDTO result = new UserDTO();
+        result.setId(savedUser.getId());
         result.setUsername(savedUser.getUsername());
         result.setEmail(savedUser.getEmail());
         result.setRole(savedUser.getRole());
-        result.setPortfolioId(savedUser.getPortfolio().getId());
+        result.setPortfolioId(null);
 
-        return result;
+        return userDto;
     }
 
     @Override
