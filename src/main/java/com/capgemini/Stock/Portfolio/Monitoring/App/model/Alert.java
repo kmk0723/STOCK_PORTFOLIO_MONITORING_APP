@@ -1,35 +1,35 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.model;
 
-import java.time.LocalDateTime;
-
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "alerts")
 public class Alert {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long userId;
 
-    private String type; 
+    private String type;
     private Double buyPrice;
     private String stockSymbol;
     private Double threshold;
-    private String direction; // "ABOVE", "BELOW"
+
+    @Enumerated(EnumType.STRING) // Stores enum as String (ABOVE/BELOW) in DB
+    private Direction direction;
 
     private Boolean isActive;
 
-    // Getters and setters
+    // Enum to represent alert direction
+    public enum Direction {
+        ABOVE,
+        BELOW
+    }
+
+    // Getters and Setters
+
     public Long getId() {
         return id;
     }
@@ -37,15 +37,6 @@ public class Alert {
     public void setId(Long id) {
         this.id = id;
     }
-    
-    public Double getBuyPrice() {
-        return buyPrice;
-    }
-
-    public void setBuyPrice(Double buyPrice) {
-        this.buyPrice = buyPrice;
-    }
-
 
     public Long getUserId() {
         return userId;
@@ -61,6 +52,14 @@ public class Alert {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Double getBuyPrice() {
+        return buyPrice;
+    }
+
+    public void setBuyPrice(Double buyPrice) {
+        this.buyPrice = buyPrice;
     }
 
     public String getStockSymbol() {
@@ -79,11 +78,11 @@ public class Alert {
         this.threshold = threshold;
     }
 
-    public String getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 
-    public void setDirection(String direction) {
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
 
@@ -95,3 +94,5 @@ public class Alert {
         this.isActive = isActive;
     }
 }
+
+
