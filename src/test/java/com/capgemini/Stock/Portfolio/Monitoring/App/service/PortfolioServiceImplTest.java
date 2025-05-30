@@ -3,6 +3,7 @@ package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.capgemini.Stock.Portfolio.Monitoring.App.dto.PortfolioSellDto;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Holding;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Portfolio;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
@@ -103,8 +104,11 @@ public class PortfolioServiceImplTest {
         holding.setBuyPrice(100.0);
 
         when(holdingRepository.findByPortfolioAndSymbol(portfolio, "AAPL")).thenReturn(Optional.of(holding));
-
-        String result = portfolioService.sellStock("testuser@example.com", "AAPL", 10);
+        PortfolioSellDto portfolioSellDto = new PortfolioSellDto();
+        portfolioSellDto.setUsername("testuser@example.com");
+        portfolioSellDto.setQuantity(5);
+        portfolioSellDto.setSymbol("AAPL");
+        String result = portfolioService.sellStock(portfolioSellDto);
 
         assertEquals("Not enough quantity to sell.", result);
         verify(holdingRepository, never()).save(any());
@@ -121,8 +125,11 @@ public class PortfolioServiceImplTest {
         holding.setBuyPrice(100.0);
 
         when(holdingRepository.findByPortfolioAndSymbol(portfolio, "AAPL")).thenReturn(Optional.of(holding));
-
-        String result = portfolioService.sellStock("testuser@example.com", "AAPL", 5);
+        PortfolioSellDto portfolioSellDto = new PortfolioSellDto();
+        portfolioSellDto.setUsername("testuser@example.com");
+        portfolioSellDto.setQuantity(5);
+        portfolioSellDto.setSymbol("AAPL");
+        String result = portfolioService.sellStock(portfolioSellDto);
 
         assertEquals("Stock sold successfully.", result);
         verify(holdingRepository).delete(holding);

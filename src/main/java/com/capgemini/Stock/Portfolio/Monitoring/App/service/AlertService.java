@@ -15,5 +15,5 @@ public interface AlertService {
     List<AlertResponseDTO> getActiveAlerts(Long userId);
     AlertResponseDTO updateAlert(Long id, AlertRequestDTO dto);
     List<AlertLog> getAllLogs();
-    void evaluateAlerts(Long userId, String stockSymbol, double currentPrice, double portfolioLossPercent);
+    void evaluateAlerts(Long userId, String stockSymbol, double currentPrice);
 }

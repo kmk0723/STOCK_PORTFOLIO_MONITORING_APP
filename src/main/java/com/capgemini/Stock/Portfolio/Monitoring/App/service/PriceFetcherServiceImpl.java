@@ -19,7 +19,7 @@ import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
 import com.capgemini.Stock.Portfolio.Monitoring.App.repository.AlertRepository;
 
 @Service
-public class PriceFetcherServiceImpl {
+public class PriceFetcherServiceImpl implements PriceFetcherService{
 
     private final AlertRepository alertRepository;
 
@@ -45,10 +45,11 @@ public class PriceFetcherServiceImpl {
         datamap.put(total, now);
         return datamap;
     }
-
+    
+    
     public double getLatestPrice(String symbol) throws Exception {
-        String url = "https://api.twelvedata.com/price?symbol=" + symbol + "&apikey=756d906150354287982c5446c03d8658";
-
+        String url = "https://api.twelvedata.com/price?symbol="+ symbol +"&apikey=756d906150354287982c5446c03d8658";
+        System.out.println(url);
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestMethod("GET");
 
@@ -92,16 +93,16 @@ public class PriceFetcherServiceImpl {
 
                 currentPrice = getLatestPrice(i.getStockSymbol());
                 System.out.println(currentPrice);
-                double gainPercent = ((currentPrice - i.getBuyPrice()) / i.getBuyPrice()) * 100;
+//                double gainPercent = ((currentPrice - i.getBuyPrice()) / i.getBuyPrice()) * 100;
 
                 if (Direction.ABOVE.equals(i.getDirection())) {
                     if (currentPrice > i.getThreshold()) {
-                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice, gainPercent);
+                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice);
                         System.out.println("ABOVE triggered");
                     }
                 } else if (Direction.BELOW.equals(i.getDirection())) {
                     if (currentPrice < i.getThreshold()) {
-                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice, gainPercent);
+                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice);
                         System.out.println("BELOW triggered");
                     }
                 }
