@@ -2,6 +2,8 @@ package com.capgemini.Stock.Portfolio.Monitoring.App.dto;
 
 import java.time.LocalDateTime;
 
+import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
+
 public class AlertResponseDTO {
     private Long id;
     private Long userId;
@@ -9,7 +11,7 @@ public class AlertResponseDTO {
     private Double buyPrice;
     private String stockSymbol;
     private Double threshold;
-    private String direction;
+    private Direction direction;
     private Boolean isActive;
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -38,7 +40,7 @@ public class AlertResponseDTO {
         return threshold;
     }
 
-    public String getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 
@@ -71,7 +73,7 @@ public class AlertResponseDTO {
         this.threshold = threshold;
     }
 
-    public void setDirection(String direction) {
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
 

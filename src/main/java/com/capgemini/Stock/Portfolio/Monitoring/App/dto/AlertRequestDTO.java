@@ -1,12 +1,14 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.dto;
 
+import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
+
 public class AlertRequestDTO {
     private Long userId;
     private String type;
     private Double buyPrice;
     private String stockSymbol;
     private Double threshold;
-    private String direction;
+    private Direction direction;
 
     // Getters and setters
     public Long getUserId() {
@@ -29,7 +31,7 @@ public class AlertRequestDTO {
         return threshold;
     }
 
-    public String getDirection() {
+    public Direction getDirection() {
         return direction;
     }
 
@@ -54,7 +56,7 @@ public class AlertRequestDTO {
         this.threshold = threshold;
     }
 
-    public void setDirection(String direction) {
+    public void setDirection(Direction direction) {
         this.direction = direction;
     }
 }
