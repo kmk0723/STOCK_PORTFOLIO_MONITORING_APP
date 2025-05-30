@@ -26,11 +26,7 @@ import com.capgemini.Stock.Portfolio.Monitoring.App.service.PortfolioService;
 @RequestMapping("/api/portfolio")
 public class PortfolioController {
 
-    private PortfolioService portfolioService;
-    
-    public PortfolioController(PortfolioService portfolioService) {
-    	this.portfolioService = portfolioService;
-    }
+    @Autowired private PortfolioService portfolioService;
 
     @GetMapping("/{username}")
     public Object getHoldings(@PathVariable String username) {
@@ -78,14 +74,19 @@ public class PortfolioController {
     }
 
     @PostMapping("/buy")
-    public String buyStock(@RequestBody PortfolioDto portfolioDto) {
-
-        return portfolioService.buyStock(portfolioDto.getUsername(), portfolioDto.getSymbol(), portfolioDto.getQuantity(), portfolioDto.getBuyPrice());
+    public String buyStock(@RequestBody Map<String, Object> payload) {
+        String username = (String) payload.get("username");
+        String symbol = (String) payload.get("symbol");
+        int quantity = (int) payload.get("quantity");
+        double buyPrice = (double) payload.get("buyPrice");
+        return portfolioService.buyStock(username, symbol, quantity, buyPrice);
     }
 
     @PutMapping("/sell")
-    public String sellStock(@RequestBody PortfolioSellDto  portfolioSellDto ) {
-
-        return portfolioService.sellStock(portfolioSellDto.getUsername(), portfolioSellDto.getSymbol(), portfolioSellDto.getQuantity());
+    public String sellStock(@RequestBody Map<String, Object> payload) {
+        String username = (String) payload.get("username");
+        String symbol = (String) payload.get("symbol");
+        int quantity = (int) payload.get("quantity");
+        return portfolioService.sellStock(username, symbol, quantity);
     }
 }

@@ -37,6 +37,8 @@ public class AlertServiceImpl implements AlertService {
 
         Alert alert = new Alert();
         alert.setUserId(user.getId());
+        alert.setBuyPrice(dto.getBuyPrice());
+        alert.setDirection(dto.getDirection());
         alert.setStockSymbol(dto.getStockSymbol());
         alert.setThreshold(dto.getThreshold());
         alert.setType(dto.getType());
@@ -106,9 +108,11 @@ public class AlertServiceImpl implements AlertService {
         AlertResponseDTO dto = new AlertResponseDTO();
         dto.setId(alert.getId());
         dto.setUserId(alert.getUserId());
+        dto.setBuyPrice(alert.getBuyPrice());
         dto.setStockSymbol(alert.getStockSymbol());
         dto.setThreshold(alert.getThreshold());
         dto.setType(alert.getType());
+        dto.setDirection(alert.getDirection());
         dto.setIsActive(alert.getIsActive());
         dto.setCreatedAt(LocalDateTime.now());
         return dto;
