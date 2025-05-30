@@ -15,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert;
+import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
 import com.capgemini.Stock.Portfolio.Monitoring.App.repository.AlertRepository;
 
 @Service
@@ -79,26 +80,26 @@ public class PriceFetcherServiceImpl {
     }
 
     // Triggers every 6000 milliseconds (6 seconds) and calls Evaluate Alerts
-    @Scheduled(fixedRate = 6000)
+    @Scheduled(fixedRate = 60000)
     public void fetchPrices() {
 
+    	System.out.println("Fetching stock prices...");
         List<Alert> alerts = alertRepository.findAll();
 
         alerts.forEach(i -> {
             double currentPrice = 0;
             try {
-                System.out.println("Fetching stock prices...");
 
                 currentPrice = getLatestPrice(i.getStockSymbol());
-
+                System.out.println(currentPrice);
                 double gainPercent = ((currentPrice - i.getBuyPrice()) / i.getBuyPrice()) * 100;
 
-                if ("ABOVE".equals(i.getDirection())) {
+                if (Direction.ABOVE.equals(i.getDirection())) {
                     if (currentPrice > i.getThreshold()) {
                         alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice, gainPercent);
                         System.out.println("ABOVE triggered");
                     }
-                } else if ("BELOW".equals(i.getDirection())) {
+                } else if (Direction.BELOW.equals(i.getDirection())) {
                     if (currentPrice < i.getThreshold()) {
                         alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice, gainPercent);
                         System.out.println("BELOW triggered");
