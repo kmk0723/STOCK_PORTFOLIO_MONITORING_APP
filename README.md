@@ -53,22 +53,23 @@ This is a Spring Boot-based Stock Portfolio Management System that allows users 
 
 ## Project Structure
 
-
-Stock-Portfolio/
+```
+StockPortfolioMonitoringApp/
 ├── src/
-│   ├── main/java/com/stockportfolio/
+│   ├── main/java/com/StockPortfolioMonitoringApp/
 │   │   ├── controller/
 │   │   ├── dto/
 │   │   ├── exception/
 │   │   ├── model/
 │   │   ├── repository/
 │   │   ├── service/
-│   └── resources/
+│   │   └── resources/
 ├── test/
-│   └── java/com/stockportfolio/
+│   └── java/com/StockPortfolioMonitoringApp/
 ├── pom.xml
 └── README.md
 
+```
 
 ---
 
@@ -76,46 +77,46 @@ Stock-Portfolio/
 
 Once the application is running, access the Swagger UI at:
 
-
+```
 http://localhost:8080/swagger-ui/index.html
 
+```
 
-1. *Mail Controller*
-
-POST /mail/send — Send an email.
-
-2. *User Controller*
-
+1. *User Controller*
+```
 POST /api/register — Register a new user.
 POST /api/login — User login.
 POST /api/holdings/sell — Sell holdings.
 POST /api/holdings/buy — Buy holdings.
 GET /api/holdings/portfolio/{userId} — Get portfolio details of a user.
 GET /api/activity/user/{userId} — Get user activity.
+```
 
-
-3. *Alert Controller*
-
+2. *Alert Controller*
+```
 POST /alert/update-price/{id} — Update alert price by ID.
 POST /alert/toggle/{id} — Enable or disable an alert by ID.
-
+```
 ## How to Run
 
 1. *Clone the repository*
+```
    bash
    git clone https://github.com/kmk0723/STOCK_PORTFOLIO_MONITORING_APP
-   cd stock-portfolio
-   
+   cd STOCK_PORTFOLIO_MONITORING_APP
+```   
 
-2. *Build the project*
+3. *Build the project*
+```
    bash
    ./mvnw clean install
-   
+``` 
 
-3. *Run the app*
+5. *Run the app*
+```
    bash
    ./mvnw spring-boot:run
-   
+```  
 
 ---
 
@@ -132,4 +133,11 @@ This project is for educational purposes only. Kindly contact the authors before
 ---
 
 ## Authors
+- [Kalakonda Mani Karthikeya](https://github.com/kmk0723)
+- [Bandaru Sai Sri Veer](https://github.com/SAISRIVEER)
+- [Chenna Reddy Nithin Kumar](https://github.com/nithinkumar986)
+- [Sanjeev Konisetty](https://github.com/sanjeevknsty)
+- [Vishnu Vimal Kumar](https://github.com/VishnuVimal24)
+- [Bevin Joshua Rajesh](https://github.com/bevinjoshua)
+
 
