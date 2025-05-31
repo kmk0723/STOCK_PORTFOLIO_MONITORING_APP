@@ -1,5 +1,7 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
+
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.UserDTO;
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.UserAlreadyExistsException;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Portfolio;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
 import com.capgemini.Stock.Portfolio.Monitoring.App.repository.PortfolioRepository;
@@ -19,6 +21,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO register(UserDTO userDto) {
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("User already exists with email: " + userDto.getEmail());
+        }
+
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
@@ -31,7 +37,6 @@ public class UserServiceImpl implements UserService {
         portfolio.setUser(savedUser);
         portfolioRepository.save(portfolio);
 
-        // Mapping to DTO
         UserDTO result = new UserDTO();
         result.setId(savedUser.getId());
         result.setUsername(savedUser.getUsername());
@@ -47,7 +52,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .filter(u -> u.getPassword().equals(password))
                 .map(user -> {
-                	UserDTO dto = new UserDTO();
+                    UserDTO dto = new UserDTO();
                     dto.setUsername(user.getUsername());
                     dto.setEmail(user.getEmail());
                     dto.setRole(user.getRole());
