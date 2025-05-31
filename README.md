@@ -145,13 +145,13 @@ GET /api/reports/export – Export report data
    cd STOCK_PORTFOLIO_MONITORING_APP
 ```   
 
-3. *Build the project*
+2. *Build the project*
 ```
    bash
    ./mvnw clean install
 ``` 
 
-5. *Run the app*
+3. *Run the app*
 ```
    bash
    ./mvnw spring-boot:run
