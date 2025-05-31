@@ -1,12 +1,12 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.dto;
 
 public class PortfolioSellDto {
-	private String username ;
+	private String email ;
 	private String symbol;
 	private int quantity;
 	
 	public String getUsername() {
-		return username;
+		return email;
 	}
 	public String getSymbol() {
 		return symbol;
@@ -17,8 +17,8 @@ public class PortfolioSellDto {
 	
 	
 	
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUsername(String email) {
+		this.email = email;
 	}
 	public void setSymbol(String symbol) {
 		this.symbol = symbol;

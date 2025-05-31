@@ -8,4 +8,5 @@ import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+    Optional<User> findById(Long adminId);
 }
