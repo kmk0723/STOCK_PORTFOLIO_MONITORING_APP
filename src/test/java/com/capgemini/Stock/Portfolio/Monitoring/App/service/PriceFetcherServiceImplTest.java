@@ -82,7 +82,7 @@ class PriceFetcherServiceImplTest {
 
         // verify alertService.evaluateAlerts was called once with expected params
         verify(alertService, times(1))
-            .evaluateAlerts(eq(1L), eq("MSFT"), eq(130.0), anyDouble());
+            .evaluateAlerts(eq(1L),eq(150.0), eq("MSFT"), eq(130.0));
     }
 
     @Test
@@ -104,7 +104,7 @@ class PriceFetcherServiceImplTest {
         spyService.fetchPrices();
 
         verify(alertService, times(1))
-            .evaluateAlerts(eq(2L), eq("TSLA"), eq(170.0), anyDouble());
+            .evaluateAlerts(eq(2L),eq(180.0), eq("TSLA"), eq(170.0));
     }
 
     @Test
@@ -125,7 +125,7 @@ class PriceFetcherServiceImplTest {
 
         spyService.fetchPrices();
 
-        verify(alertService, times(0)).evaluateAlerts(anyLong(), anyString(), anyDouble(), anyDouble());
+        verify(alertService, times(0)).evaluateAlerts(anyLong(),anyDouble(), anyString(), anyDouble());
     }
 }
 

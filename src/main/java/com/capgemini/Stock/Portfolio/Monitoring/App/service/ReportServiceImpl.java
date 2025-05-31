@@ -1,5 +1,6 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.UserNotFoundException;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Holding;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Portfolio;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
@@ -16,12 +17,13 @@ import java.util.List;
 
 @Service
 public class ReportServiceImpl {
-	@Autowired private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
     @Autowired private HoldingsRepository holdingRepository;
     @Autowired private PriceFetcherServiceImpl priceFetcherService;
 
     public List<Holding> getPortfolioSummary(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found with email: " + email));
         Portfolio portfolio = user.getPortfolio();
         return holdingRepository.findByPortfolio(portfolio);
     }
@@ -56,5 +58,4 @@ public class ReportServiceImpl {
             return new ByteArrayInputStream(out.toByteArray());
         }
     }
-
 }

@@ -1,8 +1,9 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
-import com.capgemini.Stock.Portfolio.Monitoring.App.dto.UserDTO;
+
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.HoldingsDto;
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.UserDTO;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Holding;
+
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Portfolio;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
 import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.UserAlreadyExistsException;
@@ -32,6 +33,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO register(UserDTO userDto) {
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            throw new UserAlreadyExistsException("User already exists with email: " + userDto.getEmail());
+        }
+
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
@@ -42,17 +47,16 @@ public class UserServiceImpl implements UserService {
 
         Portfolio portfolio = new Portfolio();
         portfolio.setUser(savedUser);
-        portfolioRepository.save(portfolio);
+        Portfolio port = portfolioRepository.save(portfolio);
 
-        // Mapping to DTO
         UserDTO result = new UserDTO();
         result.setId(savedUser.getId());
         result.setUsername(savedUser.getUsername());
         result.setEmail(savedUser.getEmail());
         result.setRole(savedUser.getRole());
-        result.setPortfolioId(null);
+        result.setPortfolioId(port.getId());
 
-        return userDto;
+        return result;
     }
 
     @Override
@@ -60,7 +64,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .filter(u -> u.getPassword().equals(password))
                 .map(user -> {
-                	UserDTO dto = new UserDTO();
+                    UserDTO dto = new UserDTO();
                     dto.setUsername(user.getUsername());
                     dto.setEmail(user.getEmail());
                     dto.setRole(user.getRole());
@@ -69,7 +73,7 @@ public class UserServiceImpl implements UserService {
                 });
     }
 }
-    
+
     @Override
     public  List<HoldingsDto> showHoldings(String admin){
     	Optional<User> isAdmin = userRepository.findByEmail(admin);
@@ -122,3 +126,4 @@ public class UserServiceImpl implements UserService {
     
     
 }
+
