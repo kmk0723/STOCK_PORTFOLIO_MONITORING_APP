@@ -76,25 +76,26 @@ public class AlertServiceImpl implements AlertService {
     }
 
     @Override
-    public void evaluateAlerts(Long userId, String stockSymbol, double currentPrice, double portfolioLossPercent) {
+    public void evaluateAlerts(Long userId, String stockSymbol, double currentPrice) {
         List<Alert> alerts = alertRepository.findByUserIdAndIsActiveTrue(userId);
         for (Alert alert : alerts) {
             boolean triggered = false;
             String message = "";
 
-            if ("PRICE".equals(alert.getType()) && stockSymbol.equals(alert.getStockSymbol())) {
-                if (currentPrice >= alert.getThreshold()) {
+            System.out.println(stockSymbol + " " + alert.getStockSymbol());
+            if ("PRICE".equals(alert.getType())) {
+//                if (currentPrice >= alert.getThreshold()) {
                     triggered = true;
-                    message = stockSymbol + " price reached target of " + alert.getThreshold();
-                }
+                    message = alert.getStockSymbol() + " price reached target of " + alert.getThreshold();
+//                }
             }
 
-            if ("PORTFOLIO".equals(alert.getType())) {
-                if (portfolioLossPercent >= alert.getThreshold()) {
-                    triggered = true;
-                    message = "Portfolio loss exceeded " + alert.getThreshold() + "%";
-                }
-            }
+//            if ("PORTFOLIO".equals(alert.getType())) {
+//                if (portfolioLossPercent >= alert.getThreshold()) {
+//                    triggered = true;
+//                    message = "Portfolio loss exceeded " + alert.getThreshold() + "%";
+//                }
+//            }
 
             if (triggered) {
                 AlertLog log = new AlertLog();

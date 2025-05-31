@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
-public class PriceFetcherServiceImpl {
+public class PriceFetcherServiceImpl implements PriceFetcherService{
 
     private final AlertRepository alertRepository;
 
@@ -46,18 +46,20 @@ public class PriceFetcherServiceImpl {
         return datamap;
     }
 
-    public double getLatestPrice(String symbol) {
-        try {
-            String url = "https://api.twelvedata.com/price?symbol=" + symbol + "&apikey=756d906150354287982c5446c03d8658";
-            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setRequestMethod("GET");
+    
+    
+    public double getLatestPrice(String symbol) throws Exception {
+        String url = "https://api.twelvedata.com/price?symbol="+ symbol +"&apikey=756d906150354287982c5446c03d8658";
+        System.out.println(url);
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn.setRequestMethod("GET");
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder content = new StringBuilder();
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+        String inputLine;
+        StringBuffer content = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            content.append(inputLine);
+        }
 
             in.close();
             conn.disconnect();
@@ -85,16 +87,16 @@ public class PriceFetcherServiceImpl {
             try {
                 double currentPrice = getLatestPrice(i.getStockSymbol());
                 System.out.println(currentPrice);
-                double gainPercent = ((currentPrice - i.getBuyPrice()) / i.getBuyPrice()) * 100;
+//                double gainPercent = ((currentPrice - i.getBuyPrice()) / i.getBuyPrice()) * 100;
 
                 if (Direction.ABOVE.equals(i.getDirection())) {
                     if (currentPrice > i.getThreshold()) {
-                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice, gainPercent);
+                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice);
                         System.out.println("ABOVE triggered");
                     }
                 } else if (Direction.BELOW.equals(i.getDirection())) {
                     if (currentPrice < i.getThreshold()) {
-                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice, gainPercent);
+                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice);
                         System.out.println("BELOW triggered");
                     }
                 }

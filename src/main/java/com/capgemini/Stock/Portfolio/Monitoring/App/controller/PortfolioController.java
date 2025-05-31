@@ -74,19 +74,14 @@ public class PortfolioController {
     }
 
     @PostMapping("/buy")
-    public String buyStock(@RequestBody Map<String, Object> payload) {
-        String username = (String) payload.get("username");
-        String symbol = (String) payload.get("symbol");
-        int quantity = (int) payload.get("quantity");
-        double buyPrice = (double) payload.get("buyPrice");
-        return portfolioService.buyStock(username, symbol, quantity, buyPrice);
+    public String buyStock(@RequestBody PortfolioDto portfolioDto) {
+        
+        return portfolioService.buyStock(portfolioDto);
     }
 
     @PutMapping("/sell")
-    public String sellStock(@RequestBody Map<String, Object> payload) {
-        String username = (String) payload.get("username");
-        String symbol = (String) payload.get("symbol");
-        int quantity = (int) payload.get("quantity");
-        return portfolioService.sellStock(username, symbol, quantity);
+    public String sellStock(@RequestBody PortfolioSellDto portfolioSellDto) {
+      
+        return portfolioService.sellStock(portfolioSellDto);
     }
 }
