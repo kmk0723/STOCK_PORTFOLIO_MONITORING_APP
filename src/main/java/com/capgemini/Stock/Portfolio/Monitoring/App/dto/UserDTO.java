@@ -1,10 +1,16 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public class UserDTO {
 	
 	private Long id;
     private String username;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+//    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Only Gmail addresses are allowed")
     private String email;
     private String password;
     private String role;
