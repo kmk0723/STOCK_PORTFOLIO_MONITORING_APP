@@ -84,19 +84,58 @@ http://localhost:8080/swagger-ui/index.html
 
 1. *User Controller*
 ```
-POST /api/register — Register a new user.
-POST /api/login — User login.
-POST /api/holdings/sell — Sell holdings.
-POST /api/holdings/buy — Buy holdings.
-GET /api/holdings/portfolio/{userId} — Get portfolio details of a user.
-GET /api/activity/user/{userId} — Get user activity.
+POST /api/users/register – Register user
+```
+```
+POST /api/users/register-admin – Register an admin
+```
+```
+POST /api/users/login – User login
+```
+```
+POST /api/users/{admin}/holdings – Admin view of all user holdings
+```
+```
+POST /api/users/{admin}/users – Admin view of all users
 ```
 
-2. *Alert Controller*
+2. *PortfolioController*
 ```
-POST /alert/update-price/{id} — Update alert price by ID.
-POST /alert/toggle/{id} — Enable or disable an alert by ID.
+PUT /api/portfolio/sell – Sell stock
 ```
+```
+POST /api/portfolio/buy – Buy stock
+```
+```
+GET /api/portfolio/{username} – Get portfolio by username
+```
+```
+GET /api/portfolio/showStocks – View available stocks
+```
+
+3. *Alert Controller*
+```
+PUT /api/alerts/{id} – Update alert by ID
+```
+```
+GET /api/alerts – View all alerts
+```
+```
+POST /api/alerts – Create a new alert
+```
+```
+GET /api/alerts/logs – View alert logs
+```
+
+4. *ReportController*
+```
+GET /api/reports/portfolio-summary – Portfolio summary report
+```
+```
+GET /api/reports/export – Export report data
+```
+
+
 ## How to Run
 
 1. *Clone the repository*
