@@ -53,7 +53,7 @@ public class PriceFetcherServiceImpl implements PriceFetcherService{
         System.out.println(url);
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestMethod("GET");
-
+        try {
         BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
         String inputLine;
         StringBuffer content = new StringBuffer();
@@ -82,21 +82,27 @@ public class PriceFetcherServiceImpl implements PriceFetcherService{
     public void fetchPrices() {
         System.out.println("Fetching stock prices...");
         List<Alert> alerts = alertRepository.findAll();
-
+//        System.out.println(alerts);
         alerts.forEach(i -> {
             try {
-                double currentPrice = getLatestPrice(i.getStockSymbol());
+            	double currentPrice = 0;
+            	try {
+            		
+            		currentPrice = getLatestPrice(i.getStockSymbol());
+            	}catch(Exception e) {
+            		throw new RuntimeException("Could not load current Price");
+            	}
                 System.out.println(currentPrice);
 //                double gainPercent = ((currentPrice - i.getBuyPrice()) / i.getBuyPrice()) * 100;
 
                 if (Direction.ABOVE.equals(i.getDirection())) {
                     if (currentPrice > i.getThreshold()) {
-                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice);
+                        alertService.evaluateAlerts(i.getId(), i.getThreshold(),i.getStockSymbol(), currentPrice);
                         System.out.println("ABOVE triggered");
                     }
                 } else if (Direction.BELOW.equals(i.getDirection())) {
                     if (currentPrice < i.getThreshold()) {
-                        alertService.evaluateAlerts(i.getId(), i.getStockSymbol(), currentPrice);
+                        alertService.evaluateAlerts(i.getId(),i.getThreshold(), i.getStockSymbol(), currentPrice);
                         System.out.println("BELOW triggered");
                     }
                 }

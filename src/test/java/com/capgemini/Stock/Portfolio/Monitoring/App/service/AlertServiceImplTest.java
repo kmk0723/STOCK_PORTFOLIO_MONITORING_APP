@@ -160,7 +160,7 @@ public class AlertServiceImplTest {
         when(alertRepository.findByUserIdAndIsActiveTrue(user.getId()))
             .thenReturn(Arrays.asList(alert, alert2));
 
-        alertService.evaluateAlerts(user.getId(), "AAPL", 160.0);
+        alertService.evaluateAlerts(user.getId(),170, "AAPL", 160.0);
 
         ArgumentCaptor<AlertLog> captor = ArgumentCaptor.forClass(AlertLog.class);
         verify(alertLogRepository, times(1)).save(captor.capture());
@@ -182,7 +182,7 @@ public class AlertServiceImplTest {
         when(alertRepository.findByUserIdAndIsActiveTrue(user.getId()))
             .thenReturn(Arrays.asList(portfolioAlert));
 
-        alertService.evaluateAlerts(user.getId(), "AAPL", 100.0);
+        alertService.evaluateAlerts(user.getId(),120, "AAPL", 100.0);
 
         ArgumentCaptor<AlertLog> captor = ArgumentCaptor.forClass(AlertLog.class);
         verify(alertLogRepository, times(1)).save(captor.capture());
@@ -205,7 +205,7 @@ public class AlertServiceImplTest {
         when(alertRepository.findByUserIdAndIsActiveTrue(user.getId()))
             .thenReturn(Arrays.asList(alert3));
 
-        alertService.evaluateAlerts(user.getId(), "AAPL", 100.0);
+        alertService.evaluateAlerts(user.getId(),120, "AAPL", 100.0);
 
         verify(alertLogRepository, never()).save(any());
     }

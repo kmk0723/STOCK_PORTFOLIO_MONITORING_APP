@@ -35,16 +35,16 @@ public class UserServiceImpl implements UserService {
 
         Portfolio portfolio = new Portfolio();
         portfolio.setUser(savedUser);
-        portfolioRepository.save(portfolio);
+        Portfolio port = portfolioRepository.save(portfolio);
 
         UserDTO result = new UserDTO();
         result.setId(savedUser.getId());
         result.setUsername(savedUser.getUsername());
         result.setEmail(savedUser.getEmail());
         result.setRole(savedUser.getRole());
-        result.setPortfolioId(null);
+        result.setPortfolioId(port.getId());
 
-        return userDto;
+        return result;
     }
 
     @Override
