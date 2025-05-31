@@ -76,35 +76,43 @@ public class AlertServiceImpl implements AlertService {
     }
 
     @Override
-    public void evaluateAlerts(Long userId, String stockSymbol, double currentPrice) {
-        List<Alert> alerts = alertRepository.findByUserIdAndIsActiveTrue(userId);
-        for (Alert alert : alerts) {
-            boolean triggered = false;
-            String message = "";
+    public void evaluateAlerts(Long userId,double threshold, String stockSymbol, double currentPrice) {
+        String message =stockSymbol + " price reached target of " +threshold;
 
-            System.out.println(stockSymbol + " " + alert.getStockSymbol());
-            if ("PRICE".equals(alert.getType())) {
-//                if (currentPrice >= alert.getThreshold()) {
-                    triggered = true;
-                    message = alert.getStockSymbol() + " price reached target of " + alert.getThreshold();
-//                }
-            }
-
-//            if ("PORTFOLIO".equals(alert.getType())) {
-//                if (portfolioLossPercent >= alert.getThreshold()) {
+    	   AlertLog log = new AlertLog();
+           log.setAlertId(userId);
+           log.setTriggeredAt(LocalDateTime.now());
+           log.setMessage(message);
+           alertLogRepository.save(log);
+//        List<Alert> alerts = alertRepository.findByUserIdAndIsActiveTrue(userId);
+//        System.out.println(alerts);
+//        for (Alert alert : alerts) {
+//            boolean triggered = false;
+//            String message = "";
+//
+//            System.out.println(stockSymbol + " " + alert.getStockSymbol());
+//            if ("PRICE".equals(alert.getType())) {
+////                if (currentPrice >= alert.getThreshold()) {
 //                    triggered = true;
-//                    message = "Portfolio loss exceeded " + alert.getThreshold() + "%";
-//                }
+//                    message = alert.getStockSymbol() + " price reached target of " + alert.getThreshold();
+////                }
 //            }
-
-            if (triggered) {
-                AlertLog log = new AlertLog();
-                log.setAlertId(alert.getId());
-                log.setTriggeredAt(LocalDateTime.now());
-                log.setMessage(message);
-                alertLogRepository.save(log);
-            }
-        }
+//
+////            if ("PORTFOLIO".equals(alert.getType())) {
+////                if (portfolioLossPercent >= alert.getThreshold()) {
+////                    triggered = true;
+////                    message = "Portfolio loss exceeded " + alert.getThreshold() + "%";
+////                }
+////            }
+//
+//            if (triggered) {
+//                AlertLog log = new AlertLog();
+//                log.setAlertId(alert.getId());
+//                log.setTriggeredAt(LocalDateTime.now());
+//                log.setMessage(message);
+//                alertLogRepository.save(log);
+//            }
+//        }
     }
 
     private AlertResponseDTO mapToResponse(Alert alert) {

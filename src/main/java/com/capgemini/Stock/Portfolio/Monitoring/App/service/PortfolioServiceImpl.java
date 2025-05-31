@@ -111,11 +111,11 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     public String sellStock(PortfolioSellDto portfolioSellDto) {
          User user = userRepository.findByEmail(portfolioSellDto.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + portfolioSellDto.getUsername()));
         Portfolio portfolio = user.getPortfolio();
 
         Holding h = holdingRepository.findByPortfolioAndSymbol(portfolio, portfolioSellDto.getSymbol())
-                .orElseThrow(() -> new InsufficientQuantityException("Stock not found: " + symbol));
+                .orElseThrow(() -> new InsufficientQuantityException("Stock not found: " + portfolioSellDto.getSymbol() ));
   
   
         if (portfolioSellDto.getQuantity() > h.getQuantity()) {
