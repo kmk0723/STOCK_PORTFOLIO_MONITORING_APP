@@ -1,36 +1,33 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Service;
-
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.UserNotFoundException;
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.InsufficientQuantityException;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Holding;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Portfolio;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
 import com.capgemini.Stock.Portfolio.Monitoring.App.repository.HoldingsRepository;
 import com.capgemini.Stock.Portfolio.Monitoring.App.repository.PortfolioRepository;
 import com.capgemini.Stock.Portfolio.Monitoring.App.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private PortfolioRepository portfolioRepository;
-
     @Autowired
     private HoldingsRepository holdingRepository;
 
-   
     private PriceFetcherService priceFetcherService;
 
     @Override
     public List<Map<String, Object>> getHoldings(String username) {
-        User user = userRepository.findByEmail(username).orElseThrow();
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
         Portfolio portfolio = user.getPortfolio();
         List<Holding> holdings = holdingRepository.findByPortfolio(portfolio);
 
@@ -55,7 +52,8 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public String buyStock(String username, String symbol, int quantity, double buyPrice) {
-        User user = userRepository.findByEmail(username).orElseThrow();
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
         Portfolio portfolio = user.getPortfolio();
 
         Optional<Holding> optional = holdingRepository.findByPortfolioAndSymbol(portfolio, symbol);
@@ -79,12 +77,15 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public String sellStock(String username, String symbol, int quantity) {
-        User user = userRepository.findByEmail(username).orElseThrow();
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
         Portfolio portfolio = user.getPortfolio();
 
-        Holding h = holdingRepository.findByPortfolioAndSymbol(portfolio, symbol).orElseThrow();
+        Holding h = holdingRepository.findByPortfolioAndSymbol(portfolio, symbol)
+                .orElseThrow(() -> new InsufficientQuantityException("Stock not found: " + symbol));
+
         if (quantity > h.getQuantity()) {
-            return "Not enough quantity to sell.";
+            throw new InsufficientQuantityException("Not enough quantity to sell.");
         }
 
         h.setQuantity(h.getQuantity() - quantity);
@@ -96,11 +97,12 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         return "Stock sold successfully.";
     }
+
     private double getCurrentPrice(String symbol) {
         try {
             return priceFetcherService.getLatestPrice(symbol);
         } catch (Exception e) {
-            return 0.0;
+            return 0;
         }
     }
 }

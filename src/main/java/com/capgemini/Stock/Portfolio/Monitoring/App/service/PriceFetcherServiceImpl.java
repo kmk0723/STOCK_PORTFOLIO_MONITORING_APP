@@ -1,5 +1,15 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.PriceFetchException;
+import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert;
+import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
+import com.capgemini.Stock.Portfolio.Monitoring.App.repository.AlertRepository;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -7,16 +17,6 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert;
-import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
-import com.capgemini.Stock.Portfolio.Monitoring.App.repository.AlertRepository;
 
 @Service
 public class PriceFetcherServiceImpl {
@@ -46,51 +46,44 @@ public class PriceFetcherServiceImpl {
         return datamap;
     }
 
-    public double getLatestPrice(String symbol) throws Exception {
-        String url = "https://api.twelvedata.com/price?symbol=" + symbol + "&apikey=756d906150354287982c5446c03d8658";
-
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-        conn.setRequestMethod("GET");
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String inputLine;
-        StringBuffer content = new StringBuffer();
-        while ((inputLine = in.readLine()) != null) {
-            content.append(inputLine);
-        }
-
-        in.close();
-        conn.disconnect();
-
+    public double getLatestPrice(String symbol) {
         try {
+            String url = "https://api.twelvedata.com/price?symbol=" + symbol + "&apikey=756d906150354287982c5446c03d8658";
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setRequestMethod("GET");
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder content = new StringBuilder();
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+
+            in.close();
+            conn.disconnect();
+
             JSONParser parser = new JSONParser();
             JSONObject jsonObject = (JSONObject) parser.parse(content.toString());
             String priceStr = (String) jsonObject.get("price");
 
             if (priceStr == null) {
-                throw new IllegalArgumentException("Price not found in response");
+                throw new PriceFetchException("Price not found in response for symbol: " + symbol);
             }
 
             return Double.parseDouble(priceStr);
         } catch (Exception e) {
-            System.err.println("Error parsing JSON: " + e.getMessage());
-            e.printStackTrace();
-            return -1;
+            throw new PriceFetchException("Failed to fetch price for symbol: " + symbol, e);
         }
     }
 
-    // Triggers every 6000 milliseconds (6 seconds) and calls Evaluate Alerts
     @Scheduled(fixedRate = 60000)
     public void fetchPrices() {
-
-    	System.out.println("Fetching stock prices...");
+        System.out.println("Fetching stock prices...");
         List<Alert> alerts = alertRepository.findAll();
 
         alerts.forEach(i -> {
-            double currentPrice = 0;
             try {
-
-                currentPrice = getLatestPrice(i.getStockSymbol());
+                double currentPrice = getLatestPrice(i.getStockSymbol());
                 System.out.println(currentPrice);
                 double gainPercent = ((currentPrice - i.getBuyPrice()) / i.getBuyPrice()) * 100;
 
@@ -105,10 +98,9 @@ public class PriceFetcherServiceImpl {
                         System.out.println("BELOW triggered");
                     }
                 }
-            } catch (Exception e) {
-                throw new RuntimeException("Could not load CurrentPrice");
+            } catch (PriceFetchException e) {
+                System.err.println("Error fetching price for symbol " + i.getStockSymbol() + ": " + e.getMessage());
             }
         });
     }
 }
-

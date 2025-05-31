@@ -2,6 +2,7 @@ package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.AlertRequestDTO;
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.AlertResponseDTO;
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.AlertNotFoundException;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.AlertLog;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
@@ -58,7 +59,8 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public AlertResponseDTO updateAlert(Long id, AlertRequestDTO dto) {
-        Alert alert = alertRepository.findById(id).orElseThrow();
+        Alert alert = alertRepository.findById(id)
+                .orElseThrow(() -> new AlertNotFoundException("Alert not found with ID: " + id));
 
         alert.setStockSymbol(dto.getStockSymbol());
         alert.setThreshold(dto.getThreshold());
