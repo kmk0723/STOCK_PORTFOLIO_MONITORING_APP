@@ -1,27 +1,27 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
-
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.InsufficientQuantityException;
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.UserNotFoundException;
+import com.capgemini.Stock.Portfolio.Monitoring.App.dto.PortfolioDto;
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.PortfolioSellDto;
-import com.capgemini.Stock.Portfolio.Monitoring.App.model.Holding;
-import com.capgemini.Stock.Portfolio.Monitoring.App.model.Portfolio;
-import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
-import com.capgemini.Stock.Portfolio.Monitoring.App.repository.HoldingsRepository;
-import com.capgemini.Stock.Portfolio.Monitoring.App.repository.PortfolioRepository;
-import com.capgemini.Stock.Portfolio.Monitoring.App.repository.UserRepository;
-import com.capgemini.Stock.Portfolio.Monitoring.App.service.PortfolioServiceImpl;
-import com.capgemini.Stock.Portfolio.Monitoring.App.service.PriceFetcherService;
+import com.capgemini.Stock.Portfolio.Monitoring.App.model.*;
+import com.capgemini.Stock.Portfolio.Monitoring.App.repository.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-public class PortfolioServiceImplTest {
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class PortfolioServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -40,100 +40,127 @@ public class PortfolioServiceImplTest {
 
     private User user;
     private Portfolio portfolio;
-    private Holding holding1, holding2;
+    private Holding holding;
 
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
-
-        // Setup dummy user, portfolio and holdings
+    void setup() {
         user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+
         portfolio = new Portfolio();
+        portfolio.setUser(user);
+
+        holding = new Holding();
+        holding.setSymbol("AAPL");
+        holding.setQuantity(10);
+        holding.setBuyPrice(100.0);
+        holding.setPortfolio(portfolio);
+
         user.setPortfolio(portfolio);
-
-        holding1 = new Holding();
-        holding1.setPortfolio(portfolio);
-        holding1.setSymbol("AAPL");
-        holding1.setQuantity(10);
-        holding1.setBuyPrice(100.0);
-
-        holding2 = new Holding();
-        holding2.setPortfolio(portfolio);
-        holding2.setSymbol("GOOGL");
-        holding2.setQuantity(5);
-        holding2.setBuyPrice(1500.0);
     }
 
     @Test
-    public void testGetHoldings() throws Exception {
-        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
-        when(holdingRepository.findByPortfolio(portfolio)).thenReturn(Arrays.asList(holding1, holding2));
+    void testGetHoldings_success() throws Exception {
+        when(userRepository.findByEmail("testuser")).thenReturn(Optional.of(user));
+        when(holdingRepository.findByPortfolio(portfolio)).thenReturn(List.of(holding));
+        when(priceFetcherService.getLatestPrice("AAPL")).thenReturn(120.0);
 
-        // Stub the priceFetcherService with doReturn to avoid checked exception errors
-        doReturn(110.0).when(priceFetcherService).getLatestPrice("AAPL");
-        doReturn(1550.0).when(priceFetcherService).getLatestPrice("GOOGL");
+        List<Map<String, Object>> result = portfolioService.getHoldings("testuser");
 
-        List<Map<String, Object>> holdings = portfolioService.getHoldings("testuser@example.com");
-
-        assertEquals(2, holdings.size());
-
-        Map<String, Object> appleHolding = holdings.get(0);
-        assertEquals("AAPL", appleHolding.get("symbol"));
-        assertEquals(10, appleHolding.get("quantity"));
-        assertEquals(100.0, appleHolding.get("buyPrice"));
-        assertEquals(110.0, appleHolding.get("currentPrice"));
-        assertEquals(100.0, ((Double) appleHolding.get("gain")));  // (110-100)*10=100
-        assertEquals(10.0, ((Double) appleHolding.get("gainPercent"))); // 100/1000 * 100
-
-        Map<String, Object> googleHolding = holdings.get(1);
-        assertEquals("GOOGL", googleHolding.get("symbol"));
-        assertEquals(5, googleHolding.get("quantity"));
-        assertEquals(1500.0, googleHolding.get("buyPrice"));
-        assertEquals(1550.0, googleHolding.get("currentPrice"));
-        assertEquals(250.0, ((Double) googleHolding.get("gain")));  // (1550-1500)*5=250
-        assertEquals(3.3333333333333335, ((Double) googleHolding.get("gainPercent"))); // 250/7500 * 100
+        assertEquals(1, result.size());
+        assertEquals("AAPL", result.get(0).get("symbol"));
+        assertEquals(120.0, result.get(0).get("currentPrice"));
     }
-    
-    @Test
-    public void testSellStock_NotEnoughQuantity() {
-        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
-        Holding holding = new Holding();
-        holding.setPortfolio(portfolio);
-        holding.setSymbol("AAPL");
-        holding.setQuantity(5);
-        holding.setBuyPrice(100.0);
 
+    @Test
+    void testGetHoldings_userNotFound() {
+        when(userRepository.findByEmail("unknownuser")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> {
+            portfolioService.getHoldings("unknownuser");
+        });
+    }
+
+    @Test
+    void testBuyStock_newStock() throws Exception {
+        PortfolioDto dto = new PortfolioDto();
+        dto.setUsername("testuser");
+        dto.setSymbol("GOOG");
+        dto.setQuantity(5);
+
+        when(userRepository.findByEmail("testuser")).thenReturn(Optional.of(user));
+        when(holdingRepository.findByPortfolioAndSymbol(portfolio, "GOOG")).thenReturn(Optional.empty());
+        when(priceFetcherService.getLatestPrice("GOOG")).thenReturn(150.0);
+
+        String result = portfolioService.buyStock(dto);
+
+        assertEquals("Stock bought successfully.", result);
+        verify(holdingRepository, times(1)).save(any(Holding.class));
+    }
+
+    @Test
+    void testBuyStock_existingStock() throws Exception {
+        PortfolioDto dto = new PortfolioDto();
+        dto.setUsername("testuser");
+        dto.setSymbol("AAPL");
+        dto.setQuantity(10);
+
+        when(userRepository.findByEmail("testuser")).thenReturn(Optional.of(user));
         when(holdingRepository.findByPortfolioAndSymbol(portfolio, "AAPL")).thenReturn(Optional.of(holding));
-        PortfolioSellDto portfolioSellDto = new PortfolioSellDto();
-        portfolioSellDto.setUsername("testuser@example.com");
-        portfolioSellDto.setQuantity(5);
-        portfolioSellDto.setSymbol("AAPL");
-        String result = portfolioService.sellStock(portfolioSellDto);
+        when(priceFetcherService.getLatestPrice("AAPL")).thenReturn(110.0);
 
-        assertEquals("Not enough quantity to sell.", result);
-        verify(holdingRepository, never()).save(any());
-        verify(holdingRepository, never()).delete(any());
+        String result = portfolioService.buyStock(dto);
+
+        assertEquals("Stock bought successfully.", result);
+        assertEquals(20, holding.getQuantity());
+        verify(holdingRepository, times(1)).save(holding);
     }
-    
-    @Test
-    public void testSellStock_SellAllDeletesHolding() {
-        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
-        Holding holding = new Holding();
-        holding.setPortfolio(portfolio);
-        holding.setSymbol("AAPL");
-        holding.setQuantity(5);
-        holding.setBuyPrice(100.0);
 
+    @Test
+    void testSellStock_success() {
+        PortfolioSellDto dto = new PortfolioSellDto();
+        dto.setUsername("testuser");
+        dto.setSymbol("AAPL");
+        dto.setQuantity(5);
+
+        when(userRepository.findByEmail("testuser")).thenReturn(Optional.of(user));
         when(holdingRepository.findByPortfolioAndSymbol(portfolio, "AAPL")).thenReturn(Optional.of(holding));
-        PortfolioSellDto portfolioSellDto = new PortfolioSellDto();
-        portfolioSellDto.setUsername("testuser@example.com");
-        portfolioSellDto.setQuantity(5);
-        portfolioSellDto.setSymbol("AAPL");
-        String result = portfolioService.sellStock(portfolioSellDto);
+
+        String result = portfolioService.sellStock(dto);
 
         assertEquals("Stock sold successfully.", result);
-        verify(holdingRepository).delete(holding);
+        assertEquals(5, holding.getQuantity());
+        verify(holdingRepository).save(holding);
+    }
+
+    @Test
+    void testSellStock_insufficientQuantity() {
+        PortfolioSellDto dto = new PortfolioSellDto();
+        dto.setUsername("testuser");
+        dto.setSymbol("AAPL");
+        dto.setQuantity(15); // More than available
+
+        when(userRepository.findByEmail("testuser")).thenReturn(Optional.of(user));
+        when(holdingRepository.findByPortfolioAndSymbol(portfolio, "AAPL")).thenReturn(Optional.of(holding));
+
+        assertThrows(InsufficientQuantityException.class, () -> {
+            portfolioService.sellStock(dto);
+        });
+    }
+
+    @Test
+    void testSellStock_notFound() {
+        PortfolioSellDto dto = new PortfolioSellDto();
+        dto.setUsername("testuser");
+        dto.setSymbol("MSFT");
+        dto.setQuantity(1);
+
+        when(userRepository.findByEmail("testuser")).thenReturn(Optional.of(user));
+        when(holdingRepository.findByPortfolioAndSymbol(portfolio, "MSFT")).thenReturn(Optional.empty());
+
+        assertThrows(InsufficientQuantityException.class, () -> {
+            portfolioService.sellStock(dto);
+        });
     }
 }
-
-

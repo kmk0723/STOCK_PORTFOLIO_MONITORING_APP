@@ -9,11 +9,11 @@ import com.capgemini.Stock.Portfolio.Monitoring.App.model.AlertLog;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
 
 import java.util.List;
-
+//Defines methods for logic.
 public interface AlertService {
     AlertResponseDTO createAlert(AlertRequestDTO dto);
     List<AlertResponseDTO> getActiveAlerts(Long userId);
     AlertResponseDTO updateAlert(Long id, AlertRequestDTO dto);
     List<AlertLog> getAllLogs();
     void evaluateAlerts(Long userId,double threshold, String stockSymbol, double currentPrice);
-}
+}                      

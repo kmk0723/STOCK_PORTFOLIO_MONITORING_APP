@@ -2,6 +2,7 @@ package com.capgemini.Stock.Portfolio.Monitoring.App.dto;
 
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
 
+//for incoming requests
 public class AlertRequestDTO {
     private Long userId;
     private String type;

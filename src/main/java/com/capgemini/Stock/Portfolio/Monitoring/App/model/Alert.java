@@ -3,7 +3,7 @@ package com.capgemini.Stock.Portfolio.Monitoring.App.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "alerts")
+@Table(name = "alerts") //maps table alerts
 public class Alert {
 
     @Id
@@ -21,6 +21,10 @@ public class Alert {
     private Direction direction;
 
     private Boolean isActive;
+    
+    @Column(nullable = false)
+    private Boolean triggered;
+
 
     // Enum to represent alert direction
     public enum Direction {
@@ -93,6 +97,14 @@ public class Alert {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
+    public Boolean getTriggered() {
+        return triggered;
+    }
+
+    public void setTriggered(Boolean triggered) {
+        this.triggered = triggered;
+    }
+
 }
 
 

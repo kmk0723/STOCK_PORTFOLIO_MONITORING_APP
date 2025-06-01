@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
                     return dto;
                 });
     }
-}
+
 
     @Override
     public  List<HoldingsDto> showHoldings(String admin){

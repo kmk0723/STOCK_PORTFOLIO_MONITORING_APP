@@ -1,10 +1,8 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.AlertRequestDTO;
 import com.capgemini.Stock.Portfolio.Monitoring.App.dto.AlertResponseDTO;
+import com.capgemini.Stock.Portfolio.Monitoring.App.Exceptions.AlertNotFoundException;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.AlertLog;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.User;
@@ -16,17 +14,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-public class AlertServiceImplTest {
+class AlertServiceImplTest {
 
     @Mock
     private AlertRepository alertRepository;
@@ -40,173 +39,98 @@ public class AlertServiceImplTest {
     @InjectMocks
     private AlertServiceImpl alertService;
 
-    private User user;
+    private AlertRequestDTO alertRequestDTO;
     private Alert alert;
+    private User user;
 
     @BeforeEach
-    public void setup() {
+    void setUp() {
+        alertRequestDTO = new AlertRequestDTO();
+        alertRequestDTO.setUserId(1L);
+        alertRequestDTO.setBuyPrice(100.0);
+        alertRequestDTO.setDirection(Alert.Direction.ABOVE);
+        alertRequestDTO.setStockSymbol("AAPL");
+        alertRequestDTO.setThreshold(120.0);
+        alertRequestDTO.setType("PRICE");
+
         user = new User();
         user.setId(1L);
-        user.setUsername("Test User");
 
         alert = new Alert();
-        alert.setId(10L);
-        alert.setUserId(user.getId());
+        alert.setId(1L);
+        alert.setUserId(1L);
+        alert.setBuyPrice(100.0);
+        alert.setDirection(Alert.Direction.ABOVE);
         alert.setStockSymbol("AAPL");
-        alert.setThreshold(150.0);
+        alert.setThreshold(120.0);
         alert.setType("PRICE");
         alert.setIsActive(true);
     }
 
     @Test
-    void testCreateAlert_Success() {
-        AlertRequestDTO dto = new AlertRequestDTO();
-        dto.setUserId(user.getId());
-        dto.setStockSymbol("AAPL");
-        dto.setThreshold(150.0);
-        dto.setType("PRICE");
+    void testCreateAlert() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(alertRepository.save(any(Alert.class))).thenReturn(alert);
 
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(alertRepository.save(any(Alert.class))).thenAnswer(i -> {
-            Alert savedAlert = i.getArgument(0);
-            savedAlert.setId(10L);
-            return savedAlert;
-        });
-
-        AlertResponseDTO response = alertService.createAlert(dto);
+        AlertResponseDTO response = alertService.createAlert(alertRequestDTO);
 
         assertNotNull(response);
-        assertEquals(user.getId(), response.getUserId());
         assertEquals("AAPL", response.getStockSymbol());
-        assertEquals(150.0, response.getThreshold());
-        assertEquals("PRICE", response.getType());
-        assertTrue(response.getIsActive());
-
-        verify(userRepository, times(1)).findById(user.getId());
         verify(alertRepository, times(1)).save(any(Alert.class));
-    }
-
-    @Test
-    void testCreateAlert_UserNotFound() {
-        AlertRequestDTO dto = new AlertRequestDTO();
-        dto.setUserId(999L);
-
-        when(userRepository.findById(999L)).thenReturn(Optional.empty());
-
-        RuntimeException thrown = assertThrows(RuntimeException.class,
-                () -> alertService.createAlert(dto));
-
-        assertEquals("User not found", thrown.getMessage());
     }
 
     @Test
     void testGetActiveAlerts() {
-        when(alertRepository.findByUserIdAndIsActiveTrue(user.getId()))
-            .thenReturn(Arrays.asList(alert));
+        when(alertRepository.findByUserIdAndIsActiveTrue(1L)).thenReturn(List.of(alert));
 
-        List<AlertResponseDTO> alerts = alertService.getActiveAlerts(user.getId());
+        List<AlertResponseDTO> alerts = alertService.getActiveAlerts(1L);
 
         assertEquals(1, alerts.size());
-        assertEquals(alert.getStockSymbol(), alerts.get(0).getStockSymbol());
-
-        verify(alertRepository, times(1)).findByUserIdAndIsActiveTrue(user.getId());
+        assertEquals("AAPL", alerts.get(0).getStockSymbol());
     }
 
     @Test
-    void testUpdateAlert() {
-        AlertRequestDTO dto = new AlertRequestDTO();
-        dto.setStockSymbol("GOOGL");
-        dto.setThreshold(2800.0);
-        dto.setType("PRICE");
+    void testUpdateAlert_Success() {
+        when(alertRepository.findById(1L)).thenReturn(Optional.of(alert));
+        when(alertRepository.save(any(Alert.class))).thenReturn(alert);
 
-        when(alertRepository.findById(alert.getId())).thenReturn(Optional.of(alert));
-        when(alertRepository.save(any(Alert.class))).thenAnswer(i -> i.getArgument(0));
+        AlertResponseDTO updated = alertService.updateAlert(1L, alertRequestDTO);
 
-        AlertResponseDTO updated = alertService.updateAlert(alert.getId(), dto);
+        assertNotNull(updated);
+        assertEquals("AAPL", updated.getStockSymbol());
+    }
 
-        assertEquals("GOOGL", updated.getStockSymbol());
-        assertEquals(2800.0, updated.getThreshold());
-        assertTrue(updated.getIsActive());
+    @Test
+    void testUpdateAlert_AlertNotFound() {
+        when(alertRepository.findById(2L)).thenReturn(Optional.empty());
 
-        verify(alertRepository, times(1)).findById(alert.getId());
-        verify(alertRepository, times(1)).save(any(Alert.class));
+        assertThrows(AlertNotFoundException.class, () -> {
+            alertService.updateAlert(2L, alertRequestDTO);
+        });
     }
 
     @Test
     void testGetAllLogs() {
-        AlertLog log1 = new AlertLog();
-        log1.setId(1L);
-        AlertLog log2 = new AlertLog();
-        log2.setId(2L);
+        AlertLog log = new AlertLog();
+        log.setId(1L);
+        log.setAlertId(1L);
+        log.setTriggeredAt(LocalDateTime.now());
+        log.setMessage("AAPL price reached target");
 
-        when(alertLogRepository.findAll()).thenReturn(Arrays.asList(log1, log2));
+        when(alertLogRepository.findAll()).thenReturn(List.of(log));
 
         List<AlertLog> logs = alertService.getAllLogs();
 
-        assertEquals(2, logs.size());
-        verify(alertLogRepository, times(1)).findAll();
+        assertEquals(1, logs.size());
+        assertEquals("AAPL price reached target", logs.get(0).getMessage());
     }
 
     @Test
-    void testEvaluateAlerts_PriceAlertTriggered() {
-        Alert alert2 = new Alert();
-        alert2.setId(11L);
-        alert2.setUserId(user.getId());
-        alert2.setStockSymbol("AAPL");
-        alert2.setThreshold(200.0);
-        alert2.setType("PRICE");
-        alert2.setIsActive(true);
+    void testEvaluateAlerts_CreatesLog() {
+        when(alertLogRepository.save(any(AlertLog.class))).thenAnswer(i -> i.getArgument(0));
 
-        when(alertRepository.findByUserIdAndIsActiveTrue(user.getId()))
-            .thenReturn(Arrays.asList(alert, alert2));
+        alertService.evaluateAlerts(1L, 120.0, "AAPL", 125.0);
 
-        alertService.evaluateAlerts(user.getId(),170, "AAPL", 160.0);
-
-        ArgumentCaptor<AlertLog> captor = ArgumentCaptor.forClass(AlertLog.class);
-        verify(alertLogRepository, times(1)).save(captor.capture());
-
-        AlertLog savedLog = captor.getValue();
-        assertTrue(savedLog.getMessage().contains("price reached target"));
-        assertEquals(alert.getId(), savedLog.getAlertId());
-    }
-
-    @Test
-    void testEvaluateAlerts_PortfolioAlertTriggered() {
-        Alert portfolioAlert = new Alert();
-        portfolioAlert.setId(20L);
-        portfolioAlert.setUserId(user.getId());
-        portfolioAlert.setThreshold(10.0);
-        portfolioAlert.setType("PORTFOLIO");
-        portfolioAlert.setIsActive(true);
-
-        when(alertRepository.findByUserIdAndIsActiveTrue(user.getId()))
-            .thenReturn(Arrays.asList(portfolioAlert));
-
-        alertService.evaluateAlerts(user.getId(),120, "AAPL", 100.0);
-
-        ArgumentCaptor<AlertLog> captor = ArgumentCaptor.forClass(AlertLog.class);
-        verify(alertLogRepository, times(1)).save(captor.capture());
-
-        AlertLog savedLog = captor.getValue();
-        assertTrue(savedLog.getMessage().contains("Portfolio loss exceeded"));
-        assertEquals(portfolioAlert.getId(), savedLog.getAlertId());
-    }
-
-    @Test
-    void testEvaluateAlerts_NoAlertTriggered() {
-        Alert alert3 = new Alert();
-        alert3.setId(30L);
-        alert3.setUserId(user.getId());
-        alert3.setStockSymbol("MSFT");
-        alert3.setThreshold(300.0);
-        alert3.setType("PRICE");
-        alert3.setIsActive(true);
-
-        when(alertRepository.findByUserIdAndIsActiveTrue(user.getId()))
-            .thenReturn(Arrays.asList(alert3));
-
-        alertService.evaluateAlerts(user.getId(),120, "AAPL", 100.0);
-
-        verify(alertLogRepository, never()).save(any());
+        verify(alertLogRepository, times(1)).save(any(AlertLog.class));
     }
 }

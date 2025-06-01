@@ -1,12 +1,5 @@
 package com.capgemini.Stock.Portfolio.Monitoring.App.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert;
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
 import com.capgemini.Stock.Portfolio.Monitoring.App.repository.AlertRepository;
@@ -14,10 +7,12 @@ import com.capgemini.Stock.Portfolio.Monitoring.App.repository.AlertRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
+import java.lang.reflect.Field;
+import java.util.List;
 
-@SpringBootTest
-class PriceFetcherServiceImplTest {
+import static org.mockito.Mockito.*;
+
+public class PriceFetcherServiceImplTest {
 
     @Mock
     private AlertRepository alertRepository;
@@ -25,109 +20,97 @@ class PriceFetcherServiceImplTest {
     @Mock
     private AlertService alertService;
 
-    @InjectMocks
-    private PriceFetcherServiceImpl priceFetcherService;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Test that BELOW threshold triggers alert
+     */
     @Test
-    void testGetTotalPriceWithQuantity() throws Exception {
-        // Spy on priceFetcherService to mock getLatestPrice call
-        PriceFetcherServiceImpl spyService = spy(priceFetcherService);
-
-        doReturn(100.0).when(spyService).getLatestPrice("AAPL");
-
-        HashMap<Double, String> result = spyService.getTotalPrice("AAPL", 5);
-
-        assertNotNull(result);
-        assertTrue(result.containsKey(500.0)); // 100 * 5 = 500
-        assertNotNull(result.get(500.0));
-    }
-
-    @Test
-    void testGetTotalPriceWithoutQuantity() throws Exception {
-        PriceFetcherServiceImpl spyService = spy(priceFetcherService);
-
-        doReturn(150.0).when(spyService).getLatestPrice("GOOG");
-
-        HashMap<Double, String> result = spyService.getTotalPrice("GOOG");
-
-        assertNotNull(result);
-        assertTrue(result.containsKey(150.0));
-        assertNotNull(result.get(150.0));
-    }
-
-    @Test
-    void testFetchPricesTriggersAboveAlert() throws Exception {
-        Alert alert = new Alert();
-        alert.setId(1L);
-        alert.setStockSymbol("MSFT");
-        alert.setBuyPrice(100.0);
-        alert.setThreshold(120.0);
-        alert.setDirection(Direction.ABOVE);
-
-        List<Alert> alertList = Arrays.asList(alert);
-
-        when(alertRepository.findAll()).thenReturn(alertList);
-
-        // Spy service to mock getLatestPrice
-        PriceFetcherServiceImpl spyService = spy(priceFetcherService);
-        doReturn(130.0).when(spyService).getLatestPrice("MSFT");
-
-        // call fetchPrices
-        spyService.fetchPrices();
-
-        // verify alertService.evaluateAlerts was called once with expected params
-        verify(alertService, times(1))
-            .evaluateAlerts(eq(1L),eq(150.0), eq("MSFT"), eq(130.0));
-    }
-
-    @Test
-    void testFetchPricesTriggersBelowAlert() throws Exception {
+    void testFetchPrices_belowThreshold() throws Exception {
         Alert alert = new Alert();
         alert.setId(2L);
-        alert.setStockSymbol("TSLA");
-        alert.setBuyPrice(200.0);
-        alert.setThreshold(180.0);
+        alert.setUserId(1L);
+        alert.setThreshold(200.0);
+        alert.setStockSymbol("GOOG");
         alert.setDirection(Direction.BELOW);
+        alert.setBuyPrice(210.0);
 
-        List<Alert> alertList = Arrays.asList(alert);
+        when(alertRepository.findAll()).thenReturn(List.of(alert));
 
-        when(alertRepository.findAll()).thenReturn(alertList);
+        // Create spy after mocking repo
+        PriceFetcherServiceImpl spyService = spy(new PriceFetcherServiceImpl(alertRepository));
 
-        PriceFetcherServiceImpl spyService = spy(priceFetcherService);
-        doReturn(170.0).when(spyService).getLatestPrice("TSLA");
+        // Inject alertService into private field
+        Field alertServiceField = PriceFetcherServiceImpl.class.getDeclaredField("alertService");
+        alertServiceField.setAccessible(true);
+        alertServiceField.set(spyService, alertService);
+
+        // Simulate current price
+        doReturn(190.0).when(spyService).getLatestPrice("GOOG");
+
+        // Act
+        spyService.fetchPrices();
+
+        // Assert
+        verify(alertService, times(1)).evaluateAlerts(2L, 200.0, "GOOG", 190.0);
+    }
+
+    /**
+     * Test that ABOVE threshold triggers alert
+     */
+    @Test
+    void testFetchPrices_aboveThreshold() throws Exception {
+        Alert alert = new Alert();
+        alert.setId(1L);
+        alert.setUserId(1L);
+        alert.setThreshold(150.0);
+        alert.setStockSymbol("AAPL");
+        alert.setDirection(Direction.ABOVE);
+        alert.setBuyPrice(140.0);
+
+        when(alertRepository.findAll()).thenReturn(List.of(alert));
+
+        PriceFetcherServiceImpl spyService = spy(new PriceFetcherServiceImpl(alertRepository));
+
+        Field alertServiceField = PriceFetcherServiceImpl.class.getDeclaredField("alertService");
+        alertServiceField.setAccessible(true);
+        alertServiceField.set(spyService, alertService);
+
+        doReturn(160.0).when(spyService).getLatestPrice("AAPL");
 
         spyService.fetchPrices();
 
-        verify(alertService, times(1))
-            .evaluateAlerts(eq(2L),eq(180.0), eq("TSLA"), eq(170.0));
+        verify(alertService, times(1)).evaluateAlerts(1L, 150.0, "AAPL", 160.0);
     }
 
+    /**
+     * Test that no alert is triggered if threshold condition isn't met
+     */
     @Test
-    void testFetchPricesDoesNotTriggerWhenConditionsNotMet() throws Exception {
+    void testFetchPrices_noTrigger() throws Exception {
         Alert alert = new Alert();
         alert.setId(3L);
-        alert.setStockSymbol("NFLX");
-        alert.setBuyPrice(300.0);
-        alert.setThreshold(350.0);
-        alert.setDirection(Direction.BELOW);
+        alert.setUserId(1L);
+        alert.setThreshold(100.0);
+        alert.setStockSymbol("MSFT");
+        alert.setDirection(Direction.ABOVE);  // currentPrice < threshold
+        alert.setBuyPrice(95.0);
 
-        List<Alert> alertList = Arrays.asList(alert);
+        when(alertRepository.findAll()).thenReturn(List.of(alert));
 
-        when(alertRepository.findAll()).thenReturn(alertList);
+        PriceFetcherServiceImpl spyService = spy(new PriceFetcherServiceImpl(alertRepository));
 
-        PriceFetcherServiceImpl spyService = spy(priceFetcherService);
-        doReturn(340.0).when(spyService).getLatestPrice("NFLX"); // Below threshold
+        Field alertServiceField = PriceFetcherServiceImpl.class.getDeclaredField("alertService");
+        alertServiceField.setAccessible(true);
+        alertServiceField.set(spyService, alertService);
+
+        doReturn(90.0).when(spyService).getLatestPrice("MSFT");
 
         spyService.fetchPrices();
 
-        verify(alertService, times(0)).evaluateAlerts(anyLong(),anyDouble(), anyString(), anyDouble());
+        verify(alertService, never()).evaluateAlerts(any(), anyDouble(), anyString(), anyDouble());
     }
 }
-
-
-

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+//Tells Spring this class has business logic.
 public class AlertServiceImpl implements AlertService {
 
     private final AlertRepository alertRepository;
@@ -44,10 +45,18 @@ public class AlertServiceImpl implements AlertService {
         alert.setThreshold(dto.getThreshold());
         alert.setType(dto.getType());
         alert.setIsActive(true);
+        alert.setTriggered(false); // ✅ Required to avoid DB error
+
 
         Alert saved = alertRepository.save(alert);
         return mapToResponse(saved);
     }
+    
+//    .stream(): Turns list into a stream of elements.
+//
+//    .map(this::mapToResponse): Transforms each Alert → DTO.
+//
+//    .collect(Collectors.toList()): Rebuilds a list from the stream.
 
     @Override
     public List<AlertResponseDTO> getActiveAlerts(Long userId) {
@@ -114,7 +123,7 @@ public class AlertServiceImpl implements AlertService {
 //            }
 //        }
     }
-
+//Converts internal DB entity to API-safe object.
     private AlertResponseDTO mapToResponse(Alert alert) {
         AlertResponseDTO dto = new AlertResponseDTO();
         dto.setId(alert.getId());
