@@ -15,7 +15,7 @@ import com.capgemini.Stock.Portfolio.Monitoring.App.service.AlertService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/alerts")
+@RequestMapping("/api/alerts") // end points
 public class AlertController {
 	@Autowired
     private final AlertService alertService;
@@ -28,18 +28,21 @@ public class AlertController {
     public ResponseEntity<?> createAlert(@RequestBody AlertRequestDTO alert) {
         try {
            
-            return ResponseEntity.ok( alertService.createAlert(alert));
+            return ResponseEntity.ok(alertService.createAlert(alert));
         } catch (Exception e) {
             return ResponseEntity.status(400).body(null);
         }
     }
 
-
+    //
+//    Returns a list of response DTOs for that user.
+   //
     @GetMapping
     public List<AlertResponseDTO> getAlerts(@RequestParam Long userId) {
         return alertService.getActiveAlerts(userId);
     }
 
+    //calls service to update the alert
     @PutMapping("/{id}")
     public AlertResponseDTO updateAlert(@PathVariable Long id, @RequestBody AlertRequestDTO updated) {
 
@@ -47,6 +50,7 @@ public class AlertController {
     	
     }
 
+//    returns all alert logs from the service.
     @GetMapping("/logs")
     public List<AlertLog> getAllLogs() {
         return alertService.getAllLogs();

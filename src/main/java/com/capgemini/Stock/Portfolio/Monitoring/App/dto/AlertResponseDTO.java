@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import com.capgemini.Stock.Portfolio.Monitoring.App.model.Alert.Direction;
 
+//for API response
 public class AlertResponseDTO {
     private Long id;
     private Long userId;
